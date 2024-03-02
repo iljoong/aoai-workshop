@@ -6,12 +6,15 @@ This repo contains challenges and solutions for Azure OpenAI for AI Developers w
 
 ![setup](./aoai-env.png)
 
-Provision following resources:
+Provision following Azure resources:
 
-- VM (Linux Ubuntu) and VNnet
+- VM (Linux Ubuntu 22.04 LTS) and VNnet
 - Azure Blob Storage
 - Azure AI Search
-- Azure OpenAI
+- Azure OpenAI and deploy 3 models
+    - gpt-3.5-turbo (1106)
+    - gpt-4-turbo (1106)
+    - text-embedding-ada-002 (2)
 
 Setup VM
 
@@ -19,6 +22,8 @@ Setup VM
     - https://docs.anaconda.com/free/miniconda/index.html#quick-command-line-install 
 - install packages
     - `pip install -r requirements.txt`
+- update `.env`
+    - copy `env.txt` to `.env` and update keys
 - setup/run jupyter
     - `jupyter notebook`
 
