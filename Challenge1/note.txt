@@ -1,0 +1,9 @@
+Note on sample files
+
+Sample MD files [docs](./docs) are copied from below link.
+
+https://github.com/MicrosoftDocs/azure-docs/tree/main/articles/ai-services/openai
+
+Sample PDF files in [pdf](./pdf) are copied from below link.
+
+https://github.com/Azure-Samples/azure-search-sample-data

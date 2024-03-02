@@ -4,7 +4,7 @@ This repo contains challenges and solutions for Azure OpenAI for AI Developers w
 
 ## Setup
 
-![setup](./aoai-setup.png)
+![setup](./aoai-env.png)
 
 Provision following resources:
 
