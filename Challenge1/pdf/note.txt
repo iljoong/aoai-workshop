@@ -1,0 +1,3 @@
+PDF files are copied from below link.
+
+https://github.com/Azure-Samples/azure-search-sample-data

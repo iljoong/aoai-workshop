@@ -1,0 +1,8 @@
+python-dotenv
+azure-identity
+openai
+azure-search-documents==11.6.0b1
+langchain
+langchain_openai
+Jinja2
+gradio
