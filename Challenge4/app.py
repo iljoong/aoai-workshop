@@ -21,6 +21,20 @@ CSS ="""
 #chatbot { flex-grow: 1; overflow: auto;}
 """
 
+from pathlib import Path
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+import uvicorn
+
+# create a FastAPI app
+app = FastAPI()
+# create a static directory to store the static files
+static_dir = Path('../Challenge1/pdf')
+static_dir.mkdir(parents=True, exist_ok=True)
+
+# mount FastAPI StaticFiles server
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
 with gr.Blocks(css=CSS) as demo:
     chatbot = gr.Chatbot(value=[[None, welcome_msg]], elem_id="chatbot")
     with gr.Row():
@@ -69,5 +83,13 @@ with gr.Blocks(css=CSS) as demo:
         bot, chatbot, chatbot
     )
 
-demo.queue()
-demo.launch(server_name="0.0.0.0")
+# mount Gradio app to FastAPI app
+app = gr.mount_gradio_app(app, demo, path="/")
+
+#demo.queue()
+#demo.launch(server_name="0.0.0.0")
+# serve the app
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=7860)
+
+# reference: https://discuss.huggingface.co/t/how-to-serve-an-html-file/33921/2
