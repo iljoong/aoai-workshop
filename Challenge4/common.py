@@ -101,7 +101,7 @@ def format_retrieved_documents(docs: object, maxTokens: int) -> str:
   formattedDocs = []
   strResult = ""
   for index, doc in enumerate(docs):
-    metadata.append({'title': doc['title'], 'link': f"<sup>[{index+1}](https://github.com/MicrosoftDocs/azure-docs/tree/main/articles/ai-service/openai/{doc['title']})</sup>"})
+    metadata.append({'title': doc['title'], 'link': f"<sup>[{index+1}](/static/{doc['title']})</sup>"})
       
     formattedDocs.append({
       f"[doc{index}]": {
