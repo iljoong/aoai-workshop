@@ -4,7 +4,7 @@ This repo contains challenges and solutions for Azure OpenAI for AI Developers w
 
 ## Setup
 
-![setup](./aoai-env.png)
+![setup](./aoai-setup.png)
 
 Provision following Azure resources:
 
@@ -20,6 +20,11 @@ Setup VM
 
 - install `miniconda`
     - https://docs.anaconda.com/free/miniconda/index.html#quick-command-line-install 
+- setup a new conda (python=3.9) environment
+    ```
+    conda create -n myenv python=3.9
+    conda activate myenv
+    ```
 - install packages
     - `pip install -r requirements.txt`
 - update `.env`

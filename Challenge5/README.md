@@ -2,6 +2,8 @@
 
 Setup secure deployment environment for Azure OpenAI based app.
 
+![env](./aoai-env.png)
+
 ## Access Token
 
 1. Setup managed identity on a VM
