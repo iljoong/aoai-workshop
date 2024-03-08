@@ -53,3 +53,9 @@ credential = DefaultAzureCredential()
 For Azure AI Services:
 
 - https://learn.microsoft.com/en-us/azure/ai-services/cognitive-services-virtual-networks?tabs=portal
+
+To connect OpenAI service (P.E enabled) from AI Search, you need to setup Private Link Service
+
+- https://learn.microsoft.com/en-us/azure/search/search-indexer-howto-access-private
+
+

@@ -18,6 +18,8 @@ Provision following Azure resources:
 
 Setup VM
 
+- add inbound network ports `22` and `8888` to the NSG
+- connect VM
 - install `miniconda`
     - https://docs.anaconda.com/free/miniconda/index.html#quick-command-line-install 
 - setup a new conda (python=3.9) environment
@@ -30,7 +32,9 @@ Setup VM
 - update `.env`
     - copy `env.txt` to `.env` and update keys
 - setup/run jupyter
-    - `jupyter notebook`
+    - `~/miniconda3/envs/myenv/bin/jupyter notebook`
+    - connect jupyter through ssh port foward from local PC or add `--ip 0.0.0.0 --port 8888` to connect directly from browser
+        - `ssh -nNT -L 8888:localhost:8888 user@remote_ip`
 
 ## Challenges:
 
