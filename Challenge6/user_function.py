@@ -76,7 +76,7 @@ def search_document(keyword, n=2) -> str:
         context = []
         for i in range(n):
             if i < len(results):
-                context.append( f"{results[i]['chunk']}\n[Reference {i}]({results[i]['chunk']})")
+                context.append( f"{results[i]['chunk']}\n[Reference {i}]({results[i]['chunk_id']})")
 
         # return context
         return "\n\n".join(context)
