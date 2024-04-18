@@ -37,7 +37,7 @@ endpoint = os.environ["AZSCH_ENDPOINT"]
 credential = AzureKeyCredential(os.environ["AZSCH_KEY"])
     
 #index_name = 'aoai-docs-idx'
-index_name = 'sample-pdf-index'
+index_name = os.environ["AZSCH_INDEX_NAME"]
 
 ## prompt templates
 from jinja2 import Template
