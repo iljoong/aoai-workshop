@@ -34,11 +34,11 @@ def load_module(source, module_name=None):
     sys.modules[module_name] = module
     spec.loader.exec_module(module)
 
-    manifest = json.loads(module.get_manifest())
+    manifest = module.get_manifest()
 
     func = dict(getmembers(module, isfunction))[manifest["name"]]
     
-    return func, module.get_manifest()
+    return func, manifest
 
 # python to read a file from a directory
 def read_files_from_directory(directory):
