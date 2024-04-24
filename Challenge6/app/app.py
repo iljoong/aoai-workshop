@@ -78,26 +78,16 @@ retrieve_function = {
 MODEL_GPT4 = "gpt-4-turbo"
 MODEL_GPT35 = "gpt-35-turbo-1106"
 client = AsyncAzureOpenAI(
-    api_key=os.environ['SC_AOAI_KEY'],
+    api_key=os.environ['AZURE_OPENAI_KEY'],
     api_version='2024-02-15-preview',
-    azure_endpoint=os.environ['SC_AOAI_ENDPOINT']
+    azure_endpoint=os.environ['AZURE_OPENAI_ENDPOINT']
 )
 
 import datetime
 
 system_message = f"""You are a helpful assistant that helps the user with the help of some functions.
-If you are using multiple tools to solve a user's task, make sure to communicate 
-information learned from one tool to the next tool.
-First, make a plan of how you will use the tools to solve the user's task and communicated
-that plan to the user with the first response. Then execute the plan making sure to communicate
-the required information between tools since tools only see the information passed to them;
-They do not have access to the chat history.
-If you think that tool use can be parallelized (e.g. to get weather data for multiple cities) 
-make sure to use the multi_tool_use.parallel function to execute.
 
-Don't make assumptions about what values to plug into functions. Ask for clarification if a user request is ambiguous.
-
-Today is {datetime.datetime.now()}
+Today is {datetime.datetime.utcnow() + datetime.timedelta(hours=9)}
 """
 
 @cl.on_chat_start
@@ -236,6 +226,7 @@ async def on_message(message: cl.Message):
 
 
 """
+# add `CHAINLIT_AUTH_SECRET` environment variable
 @cl.password_auth_callback
 def auth_callback(username: str, password: str):
 
