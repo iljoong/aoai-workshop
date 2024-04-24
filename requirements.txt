@@ -3,6 +3,7 @@ jupyter
 azure-identity
 openai
 azure-search-documents==11.6.0b1
+azure-ai-documentintelligence==1.0.0b2
 langchain
 langchain_openai
 Jinja2
