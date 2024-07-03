@@ -1,0 +1,13 @@
+notebooks/data
+notebooks/cifar_net.pth
+.ipynb_checkpoints/
+
+_*
+
+.env
+.vscode
+
+node_modules/
+__pycache__
+
+.files
