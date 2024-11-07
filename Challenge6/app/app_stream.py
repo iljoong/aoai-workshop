@@ -120,7 +120,8 @@ async def on_chat_start():
     cl.user_session.set("total_tokens", 0)
 
 @cl.step(type="tool")
-def call_tool(tool_call):
+def call_tool_stream(tool_call):
+
     available_functions = {
         "get_current_stock_price": get_current_stock_price,
         "get_current_currency_rate": get_current_currency_rate,
@@ -128,9 +129,9 @@ def call_tool(tool_call):
         "search_document": search_document,
     }  # only one function in this example, but you can have multiple
 
-    function_name = tool_call.function.name
+    function_name = tool_call["function"]["name"]
     function_to_call = available_functions[function_name]
-    function_args = json.loads(tool_call.function.arguments)
+    function_args = json.loads(tool_call["function"]["arguments"])
     function_response = function_to_call(**function_args)
 
     current_step = cl.context.current_step
@@ -141,14 +142,14 @@ def call_tool(tool_call):
     current_step.language = "json"
 
     return {
-        "tool_call_id": tool_call.id,
+        "tool_call_id": tool_call["id"],
         "role": "tool",
         "name": function_name,
         "content": f"{function_response}",
     }
 
 #@cl.step(type="llm")
-async def call_llm(message_history):
+async def call_llm_stream(message_history, msg):
 
     settings = {
         "model": MODEL,
@@ -162,47 +163,95 @@ async def call_llm(message_history):
         "temperature": 0
     }
 
-    response = await client.chat.completions.create(
-        messages=message_history, 
-        **settings
-    )
+    try:
+        response = await client.chat.completions.create(
+            messages=message_history, 
+            stream=True,
+            **settings
+        )
 
-    message = response.choices[0].message
-    cl.user_session.set("total_tokens", response.usage.total_tokens)
+        tool_calls = []
+        content = ""
 
-    message_history.append(message.to_dict())
+        async for part in response:
+            if part.choices:
+                delta = part.choices[0].delta
+                #print(res.choices[0].to_dict())
 
-    for tool_call in message.tool_calls or []:
-        if tool_call.type == "function":
-            tool_message = call_tool(tool_call)
-            message_history.append(tool_message)
+                if delta.tool_calls:
+                    if delta.tool_calls[0].function.name:
+                        index = delta.tool_calls[0].index
+                        if len(tool_calls) <= index:
+                            tool_calls.append({"id": None, "function": {"name": None, "arguments": ""}, "type": "function"})
 
-    if message.content:
-        #cl.context.current_step.input = message_history[-1]["content"]
-        cl.context.current_step.output = message.content
+                        tool_calls[index]["function"]["name"] = delta.tool_calls[0].function.name
+                        tool_calls[index]["id"] = delta.tool_calls[0].id
+                    if delta.tool_calls[0].function.arguments:
+                        index = delta.tool_calls[0].index
+                        tool_calls[index]["function"]["arguments"] += delta.tool_calls[0].function.arguments
+                if part.choices[0].finish_reason and part.choices[0].finish_reason == "tool_calls":
+                    # tool_calls stream is completed, add to message_history and let's function call here
+                    message_history.append({"role": "assistant", 'tool_calls': tool_calls, "content": None})
+                    
+                    completion = []
+                    for call in tool_calls:
+                        completion.append(json.dumps(call["function"]))
 
-    elif message.tool_calls:
-        # handle multiple calls
-        completion = []
-        for call in message.tool_calls:
-            completion.append(stringify_function_call(call.function))
+                    cl.context.current_step.language = "json"
+                    cl.context.current_step.output = "\n\n".join(completion)
 
-        cl.context.current_step.language = "json"
-        cl.context.current_step.output = "\n\n".join(completion)
+                    for tool_call in tool_calls:
+                        tool_message = call_tool_stream(tool_call)
+                        message_history.append(tool_message)
 
-    return message_history
+                    #return message_history
+                    break
+                
+                if part.choices[0].finish_reason and part.choices[0].finish_reason == "stop":
+                    message_history.append({"role": "assistant", "content": content})
+
+                    cl.context.current_step.output = content
+                    #return message_history
+                    break
+
+                if not delta.content:
+                    continue
+
+                content += delta.content
+
+                await msg.stream_token(delta.content)
+        
+        #await msg.update()
+        #return message_history
+
+    except Exception as e:
+        #logging.info(f"Error calling LLM: {e}")
+        message_history.append({"role": "system", "content": f"Error calling LLM: {e}"})
+    finally:
+        # close the stream connection
+        await response.close()
+
+        #count total tokens. This may not accurate since we are not counting tool calls
+        total_tokens = 0
+        for message in message_history:
+            if "content" in message and message["content"] is not None:
+                total_tokens += token_size(message['content'])
+        cl.user_session.set("total_tokens", total_tokens)
+
+        return message_history
 
 MAX_ITER = 5
 
-async def run_conversation(message_history, question):
-
-    message_history.append({"role": "user", "content": question})
+async def run_conversation_stream(message_history, question):
+    message_history.append({"role": "user", "content":question})
     
-    length_of_chat = len(message_history)
     cur_iter = 0
 
+    msg = cl.Message(content="")
+    await msg.send()
+    
     while cur_iter < MAX_ITER:
-        message_history = await call_llm(message_history)
+        message_history = await call_llm_stream(message_history, msg)
         message = message_history[-1]
         
         cur_iter += 1
@@ -210,14 +259,16 @@ async def run_conversation(message_history, question):
             # run call_llm again to get the response
             continue
         else:
-            answer = ""
-            for past_message in message_history[length_of_chat:]:
-                if past_message["role"] == "assistant" and past_message["content"] is not None:
-                    answer += past_message['content'] + "\n"
+            response = '\n'
 
-            return answer, message_history
+            await msg.stream_token(response)
+            await msg.update()
+            return "", message_history
 
-    return "exceeded max iterations", message_history
+    response = f'exceeded max iterations\n'
+    await msg.stream_token(response)
+    await msg.update()
+    return "", message_history
 
 @cl.on_message
 async def on_message(message: cl.Message):
@@ -236,12 +287,10 @@ async def on_message(message: cl.Message):
         # chat chat history
         message_history = cl.user_session.get("message_history")
 
-        response, message_history = await run_conversation(message_history, question)
+        response, message_history = await run_conversation_stream(message_history, question)
 
 
-        cl.user_session.set("message_history", message_history)
-        
-        await cl.Message(response).send()
+    cl.user_session.set("message_history", message_history)
 
 
 """

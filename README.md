@@ -11,9 +11,8 @@ Provision following Azure resources:
 - VM (Linux Ubuntu 22.04 LTS) and VNnet
 - Azure Blob Storage
 - Azure AI Search
-- Azure OpenAI and deploy 3 models
-    - gpt-3.5-turbo (1106)
-    - gpt-4-turbo (1106)
+- Azure OpenAI and deploy 2 models
+    - gpt-4o (2024-08-06)
     - text-embedding-ada-002 (2)
 
 Setup VM
@@ -35,6 +34,8 @@ Setup VM
     - `~/miniconda3/envs/myenv/bin/jupyter notebook`
     - connect jupyter through ssh port foward from local PC or add `--ip 0.0.0.0 --port 8888` to connect directly from browser
         - `ssh -nNT -L 8888:localhost:8888 user@remote_ip`
+
+> Note: Your can directly access sample notebooks via VS Code without install jupyter. 
 
 ## Challenges:
 
@@ -61,3 +62,8 @@ Setup VM
     - implement token acess and network security 
         - change to token access using managed identity
         - setup `Private Endpoint`
+
+6. Advanced Chatbot
+    - implement advanced chatbot using [chainlit](https://docs.chainlit.io/get-started/overview) and [function calling](https://platform.openai.com/docs/guides/function-calling)
+
+7. Image search and generation

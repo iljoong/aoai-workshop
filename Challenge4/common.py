@@ -101,7 +101,7 @@ def format_retrieved_documents(docs: object, maxTokens: int) -> str:
   formattedDocs = []
   strResult = ""
   for index, doc in enumerate(docs):
-    metadata.append({'title': doc['title'], 'link': f"<sup>[{index+1}](/static/{doc['title']})</sup>"})
+    metadata.append({'title': doc['title'], 'link': f"<sup>[{index+1}](/static/{doc['parent_id']})</sup>"})
       
     formattedDocs.append({
       f"[doc{index}]": {

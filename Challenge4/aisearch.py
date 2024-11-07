@@ -9,7 +9,7 @@ class AISearch:
     def get_results(self, text):
         vector_query = VectorizableTextQuery(text=text, k_nearest_neighbors=self.topK, fields="vector", exhaustive=True)
         results = self.search_client.search(  
-            search_text=None,  
+            search_text=text,  
             vector_queries= [vector_query],
             select=["parent_id", "chunk_id", "chunk", "title"],
             top=self.topK
