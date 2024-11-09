@@ -85,12 +85,12 @@ def get_results_semantic(text, n=3):
 
     return results
 
-def search_document(keyword, n=2) -> str:
-    keyword = fix_bad_encoding(keyword)
-    print(Fore.BLUE, f"tool: search the document of \"{keyword}\"", Style.RESET_ALL)
+def search_document(question, n=2) -> str:
+    #question = fix_bad_encoding(question)
+    print(Fore.BLUE, f"tool: search the document of \"{question}\"", Style.RESET_ALL)
 
     try:
-        results = list(get_results_semantic(keyword, n))
+        results = list(get_results_semantic(question, n))
         
         context = []
         for i in range(n):

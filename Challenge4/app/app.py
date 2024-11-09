@@ -21,6 +21,9 @@ import json
 from dotenv import load_dotenv
 load_dotenv()
 
+import logging
+logging.basicConfig(level=logging.CRITICAL)
+
 import tiktoken
 encoding = tiktoken.get_encoding("cl100k_base")
 
@@ -80,12 +83,12 @@ retrieve_function = {
     "parameters": {
         "type": "object",
         "properties": {
-            "keyword": {
+            "question": {
                 "type": "string",
-                "description": "Search keyword to find the information. e.g., API, technology, and etc."
+                "description": "Re-written and detailed question to find the right information. e.g., API, technology, and etc."
             }
         },
-        "required": ["keyword"]
+        "required": ["question"]
     }
 }
 

@@ -80,12 +80,12 @@ retrieve_function = {
     "parameters": {
         "type": "object",
         "properties": {
-            "keyword": {
+            "question": {
                 "type": "string",
-                "description": "Search keyword to find the information. e.g., API, technology, and etc."
+                "description": "Re-written and detailed question to find the right information. e.g., API, technology, and etc."
             }
         },
-        "required": ["keyword"]
+        "required": ["question"]
     }
 }
 
@@ -96,18 +96,8 @@ client = AsyncAzureOpenAI(
     azure_endpoint=os.environ['AZURE_OPENAI_ENDPOINT']
 )
 
-'''
-import datetime
-
-system_message = f"""You are a helpful assistant that helps the user with the help of some functions.
-
-Today is {datetime.datetime.utcnow() + datetime.timedelta(hours=9)}
-"""
-'''
-
 from prompts import simple_system_message, ground_system_message, adv_system_message
 system_message = adv_system_message
-
 
 @cl.on_chat_start
 async def on_chat_start():
