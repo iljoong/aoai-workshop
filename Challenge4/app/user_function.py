@@ -53,7 +53,12 @@ credential = AzureKeyCredential(key)
 index_name = os.getenv("AZSCH_INDEX_NAME")  
 
 from azure.search.documents import SearchClient
-from azure.search.documents.models import VectorizableTextQuery
+from azure.search.documents.models import (
+    VectorizableTextQuery,
+    QueryType,
+    QueryCaptionType,
+    QueryAnswerType
+)
 
 search_client = SearchClient(service_endpoint, index_name, credential=credential)
 
@@ -66,17 +71,31 @@ def get_results(text, n=2):
         top=n)
     return results
 
-def search_document(keyword, n=2) -> str:
-    keyword = fix_bad_encoding(keyword)
-    print(Fore.BLUE, f"tool: search the document of \"{keyword}\"", Style.RESET_ALL)
+def get_results_semantic(text, n=3):
+    vector_query = VectorizableTextQuery(text=text, k_nearest_neighbors=n, fields="vector", exhaustive=True)
+
+    results = search_client.search(  
+        search_text=text,
+        vector_queries=[vector_query],
+        select=["parent_id", "chunk_id", "chunk", "title"],
+        query_type=QueryType.SEMANTIC,
+        semantic_configuration_name='semantic-config',
+        top=n
+    )
+
+    return results
+
+def search_document(question, n=2) -> str:
+    #question = fix_bad_encoding(question)
+    print(Fore.BLUE, f"tool: search the document of \"{question}\"", Style.RESET_ALL)
 
     try:
-        results = list(get_results(keyword, n))
+        results = list(get_results_semantic(question, n))
         
         context = []
         for i in range(n):
             if i < len(results):
-                context.append( f"{results[i]['chunk']}\n[Reference {i}]({results[i]['chunk_id']})")
+                context.append( f"{results[i]['chunk']}\n[Reference {i}]({results[i]['parent_id']})")
 
         # return context
         return "\n\n".join(context)
@@ -93,3 +112,9 @@ def simple_math(expression) -> str:
     except Exception as e:
         print(Fore.RED, f"Error: {e}", Style.RESET_ALL)
         return "Error occurred while evaluating math expression"
+    
+if __name__ == "__main__":
+    #print(get_current_stock_price("AAPL"))
+    #print(get_current_currency_rate("USDJPY"))
+    print(search_document("Assistant API Python sample code"))
+    #print(simple_math("2+2"))

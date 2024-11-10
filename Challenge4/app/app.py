@@ -1,11 +1,28 @@
 import chainlit as cl
 from openai import AsyncAzureOpenAI
-from chainlit.playground.providers.openai import stringify_function_call
+#from chainlit.playground.providers.openai import stringify_function_call
+# chainlit 1.1.201 => 1.1.402
+def stringify_function_call(function_call):
+    if isinstance(function_call, dict):
+        _function_call = function_call.copy()
+    else:
+        _function_call = {
+            "arguments": function_call.arguments,
+            "name": function_call.name,
+        }
+
+    if "arguments" in _function_call and isinstance(_function_call["arguments"], str):
+        _function_call["arguments"] = json.loads(_function_call["arguments"])
+    return json.dumps(_function_call, indent=4, ensure_ascii=False)
+
 import os
 import json
 
 from dotenv import load_dotenv
 load_dotenv()
+
+import logging
+logging.basicConfig(level=logging.CRITICAL)
 
 import tiktoken
 encoding = tiktoken.get_encoding("cl100k_base")
@@ -62,33 +79,38 @@ math_function = {
 
 retrieve_function = {
     "name": "search_document",
-    "description": "search and get the company information about work manual, policy, etc.",
+    "description": "search and get Azure OpenAI and Generative AI related information.",
     "parameters": {
         "type": "object",
         "properties": {
-            "keyword": {
+            "question": {
                 "type": "string",
-                "description": "Search keyword to find the information. e.g., Policy, Work Manual, etc."
+                "description": "Re-written and detailed question to find the right information. e.g., API, technology, and etc."
             }
         },
-        "required": ["keyword"]
+        "required": ["question"]
     }
 }
 
-MODEL_GPT4 = "gpt-4-turbo"
-MODEL_GPT35 = "gpt-35-turbo-1106"
+MODEL = "gpt-4o"
 client = AsyncAzureOpenAI(
     api_key=os.environ['AZURE_OPENAI_KEY'],
-    api_version='2024-02-15-preview',
+    api_version='2024-11-01-preview',
     azure_endpoint=os.environ['AZURE_OPENAI_ENDPOINT']
 )
 
+'''
 import datetime
 
 system_message = f"""You are a helpful assistant that helps the user with the help of some functions.
 
 Today is {datetime.datetime.utcnow() + datetime.timedelta(hours=9)}
 """
+'''
+
+from prompts import simple_system_message, ground_system_message, adv_system_message
+system_message = adv_system_message
+
 
 @cl.on_chat_start
 async def on_chat_start():
@@ -128,11 +150,11 @@ def call_tool(tool_call):
         "content": f"{function_response}",
     }
 
-@cl.step(type="llm")
+#@cl.step(type="llm")
 async def call_llm(message_history):
 
     settings = {
-        "model": MODEL_GPT35,
+        "model": MODEL,
         "tool_choice": "auto",
         "tools": [
             {"type": "function", "function": retrieve_function},

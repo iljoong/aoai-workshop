@@ -2,11 +2,14 @@ python-dotenv
 jupyter
 azure-identity
 openai
-azure-search-documents==11.6.0b1
+tiktoken
+azure-search-documents==11.6.0b6
 azure-ai-documentintelligence==1.0.0b2
+azure-storage-blob==12.23.1
 langchain
 langchain_openai
+colorama
 Jinja2
 gradio
 yfinance
-chainlit
+chainlit==1.1.401
